@@ -85,5 +85,21 @@ class TestCalcPredepXy(unittest.TestCase):
 
         # Assert
         self.assertEqual(predep_i, 0.0)  # No calculation for single point
+
+class TestBootstrap(unittest.TestCase):
+
+    def test_bootstrap_basic(self):
+        # Arrange
+        num_boots = 50
+        data = np.array([[i,i] for i in range(100)])
+        segmentation_method = lambda x: [[0,50],[50,100]]  # Mock segmentation
+
+        # Act
+        bootstrap_stats = bootstrap(data, segmentation_method,num_boots = num_boots)
+
+        # Assert
+        self.assertEqual(len(bootstrap_stats), num_boots)  # Number of replicates
+        # Check for some non-zero values (replace with more specific assertions)
+        self.assertGreater(sum(bootstrap_stats), 0.0)
 if __name__ == '__main__':
     unittest.main()

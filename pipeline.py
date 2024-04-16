@@ -1,16 +1,24 @@
 import numpy as np
 from scipy.stats import gaussian_kde
 from scipy.cluster import hierarchy
+from sklearn.model_selection import train_test_split
+from sklearn.utils import resample
 
-def predep(x,num_boots = 5000):
-    x1 = np.random.choice(x, size=num_boots, replace=True)
-    x2 = np.random.choice(x, size=num_boots, replace=True)
 
-    x_d = x1 - x2
+def predep(x,num_boots = 10000):
+  if len(np.unique(x)) == 1:
+    return 0
 
-    kde = gaussian_kde(x_d)
+  num_boots = min(max(50,len(x) * len(x)),num_boots)
 
-    return kde.evaluate(0)[0]
+  x1 = np.random.choice(x, size=num_boots, replace=True)
+  x2 = np.random.choice(x, size=num_boots, replace=True)
+
+  x_d = x1 - x2
+
+  kde = gaussian_kde(x_d)
+
+  return kde.evaluate(0)[0]
 
 def cluster_assign(x,clusters):
 
@@ -37,10 +45,8 @@ def cluster_assign(x,clusters):
 
 def calc_predep_xy(data,clusters):
   labels = cluster_assign(data[:,1],clusters)
-
-  n_clusters = len(clusters)
   predep_i = 0
-  for j in range(n_clusters):
+  for j in np.unique(labels):
       data_index = labels == j
 
       if np.sum(data_index)  <= 1:
@@ -51,10 +57,12 @@ def calc_predep_xy(data,clusters):
   return predep_i
 
 
-def pipeline(data_train,data_test,data_validation,segmetantion_method):
+def pipeline(data_train, data_test, data_validation, segmentation_method):
     predep_x = predep(data_test[:, 0])
 
-    clusters = segmetantion_method(data_train)
+    clusters = segmentation_method(data_train)
+
+    print(clusters)
 
     predep_xy = calc_predep_xy(data_train,clusters)
 
@@ -62,4 +70,23 @@ def pipeline(data_train,data_test,data_validation,segmetantion_method):
 
     return predep_alpha
 
+def bootstrap(data, segmentation_method, num_boots=100):
+  # Create empty list to store bootstrap replicates
+  bootstrap_stats = []
+
+  # Loop for the desired number of replicates
+  for _ in range(num_boots):
+    # Sample with replacement to create a bootstrap replicate
+    data_replicate = resample(data, replace=True)
+
+    data_train,data_test = train_test_split(data_replicate,test_size=0.9)
+
+    # Calculate the statistic (replace with your specific statistic calculation)
+    predep_alpha = pipeline(data_train = data_train, data_test = data_test, data_validation=None, segmentation_method = segmentation_method)
+    # Append the statistic to the list
+    bootstrap_stats.append(predep_alpha)
+
+  bootstrap_stats = np.array(bootstrap_stats)
+
+  return bootstrap_stats
 
