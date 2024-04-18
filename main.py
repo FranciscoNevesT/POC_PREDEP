@@ -9,12 +9,12 @@ from multiprocessing import Pool
 mean = [0, 0]
 cov = [[1, 0.8],
       [0.8, 1]]
-n_samples = 1000
+n_samples = 100000
 
 def calculate_and_append(data):
   data_train, data_test = train_test_split(data, test_size=0.1)
   predep_alpha = pipeline(data_train=data_train, data_test=data_test, data_validation=None,
-                             segmentation_method=segmentation_by_predep)
+                             segmentation_method=segmentation_proportional)
   return predep_alpha
 if __name__ == '__main__':
 

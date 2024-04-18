@@ -1,6 +1,6 @@
 import numpy as np
 from pipeline import predep
-
+from astropy.stats import histogram
 
 # Todo: Consertar o codigo
 def segmentation_by_predep(data, max_clusters = 5):
@@ -70,6 +70,20 @@ def segmentation_proportional(data,n_clusters = 10):
 
   return cluster_boundaries
 
+
+def segmentation_histogram(data):
+  data_index = np.argsort(data[:, 1])
+  data = data[data_index]
+
+  y = data[:, 1]
+  x = data[:, 0]
+
+  hist,bin_edges = histogram(y)
+
+  clusters_y = [[bin_edges[i],bin_edges[i+1]] for i in range(len(bin_edges) - 1)]
+  cluster_boundaries = get_cluster_boundaries(clusters_y)
+
+  return cluster_boundaries
 
 def get_cluster_boundaries(clusters):
   if len(clusters) == 0:
