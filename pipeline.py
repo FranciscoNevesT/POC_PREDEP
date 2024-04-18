@@ -62,8 +62,6 @@ def pipeline(data_train, data_test, data_validation, segmentation_method):
 
     clusters = segmentation_method(data_train)
 
-    print(clusters)
-
     predep_xy = calc_predep_xy(data_train,clusters)
 
     predep_alpha = (predep_xy - predep_x)/predep_xy
